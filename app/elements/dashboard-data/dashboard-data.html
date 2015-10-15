@@ -1,0 +1,76 @@
+<!--
+@license
+Copyright (c) 2015 The Polymer Project Authors. All rights reserved.
+This code may only be used under the BSD style license found at http://polymer.github.io/LICENSE.txt
+The complete set of authors may be found at http://polymer.github.io/AUTHORS.txt
+The complete set of contributors may be found at http://polymer.github.io/CONTRIBUTORS.txt
+Code distributed by Google as part of the polymer project is also
+subject to an additional IP rights grant found at http://polymer.github.io/PATENTS.txt
+-->
+<link rel="import" href="../../bower_components/polymer/polymer.html">
+<link rel="import" href="../../bower_components/iron-ajax/iron-ajax.html">
+
+<dom-module id="dashboard-data">
+  <template>
+  </template>
+
+  <script>
+    (function () {
+      'use strict';
+
+      var _els = [];
+
+      Polymer({
+        is: 'dashboard-data',
+
+        properties: {
+          eventMap: {
+            type: Object,
+            notify: true,
+            value: {}
+          },
+          message: {
+            type: String,
+            notify: true
+          }
+        },
+
+        attached: function() {
+          _els.push(this);
+        },
+
+        ready: function() {
+          var url = "http://rz-ws-dash01.rrz.uni-hamburg.de/events"
+          var source = new EventSource(url, { withCredentials: true });
+
+          //this.$.header.textContent = 'Hello!';
+          var that = this;
+          source.addEventListener('message', function(e) {
+            var data = JSON.parse(e.data);
+
+            //that.set('eventMap.' + data.id, data);
+            that.eventMap[data.id] = data;
+            //console.log('updating', 'eventMap.' + data.id, data);
+            that.notifyPath('eventMap.' + data.id, data);
+            that.notifyPath('eventMap', that.eventMap);
+            //console.log(that.events);
+            that.message = e.data;
+
+            //console.log(that.events);
+            console.log(_els);
+          }, false);
+
+          source.addEventListener('open', function(e) {
+            //console.log("dasboard-data: connection opened")
+          }, false);
+
+        },
+
+        _handleResponse: function(response, req) {
+          console.log(response.detail, req);
+        }
+      });
+    })();
+  </script>
+
+</dom-module>
